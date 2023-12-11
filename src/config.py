@@ -94,6 +94,34 @@ class AppSettings(BaseSettings):
         description="SMTP password used for sending email",
     )
 
+    ADMIN_USERNAME: str = Field(
+        default="admin",
+        title="Admin username",
+        description="Admin username",
+        type="string",
+    )
+
+    ADMIN_EMAIL: str = Field(
+        default="admin@gmail.com",
+        title="Admin email",
+        description="Admin email",
+        type="string",
+    )
+
+    ADMIN_MOBILE: str = Field(
+        default="01000000000",
+        title="Admin mobile",
+        description="Admin mobile",
+        type="string",
+    )
+
+    ADMIN_PASSWORD: SecretStr = Field(
+        default="admin",
+        title="Admin password",
+        description="Admin password which must be at least 8 characters long",
+        min_length=8,
+    )
+
     
 
 

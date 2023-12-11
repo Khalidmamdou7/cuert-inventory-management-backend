@@ -109,3 +109,47 @@ def reset_password(email: EmailStr, token: str, new_password: str):
     Mailer().send_notification_email(
         user.email, "Your password has been reset successfully"
     )
+
+
+def create_admin_user():
+    # TODO: The flow of this function could be improved (eliminate the need for the if else block)
+
+
+    print("Trying to create admin user")
+    admin_user = UserInDB(
+        full_name="Admin",
+        username=APP_SETTINGS.ADMIN_USERNAME,
+        email=APP_SETTINGS.ADMIN_EMAIL,
+        mobile=APP_SETTINGS.ADMIN_MOBILE,
+        hashed_password=get_password_hash(APP_SETTINGS.ADMIN_PASSWORD.get_secret_value()),
+        role=RoleEnum.ADMIN,
+        disabled=False,
+    )
+    isAdminUserCreated = UsersDB().get_admin_user()
+    if isAdminUserCreated:        
+        print("Admin user already exists")
+    else:
+        UsersDB().add_user(admin_user)
+        print("Admin user created successfully")
+
+def assign_role(user_identifier: str, role: RoleEnum):
+    if role == RoleEnum.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You can't assign the admin role to a user",
+        )
+
+    user = UsersDB().get_user(user_identifier)
+    if user.role == RoleEnum.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You can't change the role of the admin user",
+        )
+    
+    print("Assigning role: ", role)
+    print("To user: ", user)
+    user.role = role
+    UsersDB().update_user(user)
+    Mailer().send_notification_email(
+        user.email, f"Your role has been updated to a/an {role.value}"
+    )

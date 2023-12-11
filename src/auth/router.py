@@ -4,7 +4,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 
 from ..models import ResponseModel
 
@@ -64,3 +64,15 @@ async def read_users_me(
     return {"status": "success", "message": "User details retrieved successfully", "data": current_user}
 
 
+@router.get("/assign-role/{identifier}", response_model=ResponseModel[User], tags=["admin"])
+async def assign_role(
+    identifier: str,
+    role: RoleEnum,
+    current_user: Annotated[User, Depends(authenticate_user_jwt)]
+):
+    if current_user.role != RoleEnum.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have the permission to perform this action",
+        )
+    return {"status": "success", "message": "Role assigned successfully", "data": auth_service.assign_role(identifier, RoleEnum(role))}

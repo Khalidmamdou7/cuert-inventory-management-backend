@@ -4,7 +4,7 @@
 # for db
 
 from fastapi import HTTPException, status
-from .models import UserInDB, UserCreateResponse
+from .models import UserInDB, UserCreateResponse, RoleEnum
 from ..database import Database
 from pymongo.errors import DuplicateKeyError
 from bson.objectid import ObjectId
@@ -96,4 +96,14 @@ class UsersDB():
         self.collection.update_one({"username": user.username}, {"$set": user.model_dump()})
         return user
 
+    def get_admin_user(self) -> UserInDB or None:
+        """
+        Get the admin user from the database.
 
+        Returns:
+            UserInDB: the admin user
+        """
+        admin_user = self.collection.find_one({"role": RoleEnum.ADMIN})
+        if admin_user is None:
+            return None
+        return UserInDB(**admin_user)
