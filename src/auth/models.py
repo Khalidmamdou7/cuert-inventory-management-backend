@@ -5,8 +5,6 @@ from enum import Enum as PyEnum
 from pydantic import BaseModel, EmailStr, validator, Field
 from typing import Optional, Annotated
 import re
-from bson import ObjectId
-from ..utils.utils import PyObjectId
 
 class RoleEnum(str, PyEnum):
     ADMIN = 'Admin' # Note: If you change this, you might broke creating the admin as it checks for this value before creating one (see auth/service.py/create_admin_user)

@@ -26,9 +26,22 @@ async def lifespan(app: FastAPI):
     # Code to be executed on application shutdown
     print("App is shutting down")
 
+description = """
+This is the backend for the CUERT Inventory app, as well as the CUERT Recruitment system.
 
+The app is currently in development, so expect bugs and unfinished features. If you find any bugs, please open an issue on the GitHub repository
+"""
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    lifespan=lifespan, 
+    title=APP_SETTINGS.APP_NAME,
+    description=description,
+    version="0.0.1",
+    contact={
+        "name": "CUERT-WEB-REPO",
+        "url": "https://github.com/cuert-web/cuert-backend/issues"
+    },
+)
 
 origins = [
     "http://localhost.tiangolo.com",
