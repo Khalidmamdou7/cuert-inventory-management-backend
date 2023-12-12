@@ -153,3 +153,12 @@ def assign_role(user_identifier: str, role: RoleEnum):
     Mailer().send_notification_email(
         user.email, f"Your role has been updated to a/an {role.value}"
     )
+    return user
+
+def assign_team(user_identifier: str, team_id: str):
+    user = UsersDB().get_user(user_identifier)
+    user = UsersDB().set_user_team(user, team_id)
+    Mailer().send_notification_email(
+        user.email, f"You have been assigned to team: {user.team}"
+    )
+    return user

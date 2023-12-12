@@ -57,22 +57,38 @@ def reset_password(request: ResetPasswordRequest):
     auth_service.reset_password(request.email, request.token, request.new_password)
     return {"status": "success", "message": "Password reset successfully", "data": None}
 
-@router.get("/users/me/", response_model=ResponseModel[User], tags=["users"])
+@router.get("/users/me/", response_model=ResponseModel[UserResponse], tags=["users"])
 async def read_users_me(
-    current_user: Annotated[User, Depends(get_current_user)]
+    current_user: Annotated[UserResponse, Depends(get_current_user)]
 ):
     return {"status": "success", "message": "User details retrieved successfully", "data": current_user}
 
 
-@router.get("/assign-role/{identifier}", response_model=ResponseModel[User], tags=["admin"])
+@router.get("/assign-role/{user_identifier}", response_model=ResponseModel[UserResponse], tags=["admin"])
 async def assign_role(
-    identifier: str,
+    user_identifier: str,
     role: RoleEnum,
-    current_user: Annotated[User, Depends(authenticate_user_jwt)]
+    current_user: Annotated[UserResponse, Depends(authenticate_user_jwt)]
 ):
     if current_user.role != RoleEnum.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have the permission to perform this action",
         )
-    return {"status": "success", "message": "Role assigned successfully", "data": auth_service.assign_role(identifier, RoleEnum(role))}
+    return {"status": "success", "message": "Role assigned successfully", "data": auth_service.assign_role(user_identifier, RoleEnum(role))}
+
+@router.get("/assign-team/{user_identifier}", response_model=ResponseModel[UserResponse], tags=["admin"])
+async def assign_team(
+    user_identifier: str,
+    team_id: str,
+    current_user: Annotated[UserResponse, Depends(authenticate_user_jwt)]
+):
+    if current_user.role != RoleEnum.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have the permission to perform this action",
+        )
+    return {"status": "success", "message": "Team assigned successfully", "data": auth_service.assign_team(user_identifier, team_id)}
+
+
+

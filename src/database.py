@@ -50,4 +50,8 @@ class Database:
         self.db.users.create_index('email', unique=True)
         self.db.users.create_index('mobile', unique=True)
 
+        self.db.teams.create_index('name', unique=True)
+        # for "users_teams" collection, the unique index is a combination of "user_id" and "team_id"
+        self.db.users_teams.create_index([('user_id', 1), ('team_id', 1)], unique=True)
+
         print('Created indexes successfully')

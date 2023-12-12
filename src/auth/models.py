@@ -5,18 +5,20 @@ from enum import Enum as PyEnum
 from pydantic import BaseModel, EmailStr, validator, Field
 from typing import Optional, Annotated
 import re
-import bcrypt
+from bson import ObjectId
+from ..utils.utils import PyObjectId
 
 class RoleEnum(str, PyEnum):
-    ADMIN = 'admin'
-    TEAM_HEAD = 'team_head'
-    TEAM_MEMBER = 'team_member'
+    ADMIN = 'Admin' # Note: If you change this, you might broke creating the admin as it checks for this value before creating one (see auth/service.py/create_admin_user)
+    TEAM_HEAD = 'Team Head'
+    TEAM_MEMBER = 'Team Member'
 
 class Token(BaseModel):
     access_token: str
     token_type: str
 
 class TokenData(BaseModel):
+    id: Optional[str] = None
     username: Optional[str] = None
     full_name: Optional[str] = None
     mobile: Optional[str] = None
@@ -31,13 +33,16 @@ class User(BaseModel):
     full_name: Annotated[str, Field(..., min_length=3, max_length=50, examples=['John Doe'])] = "dummy_full_name"
     mobile: Annotated[str, Field(..., min_length=11, max_length=11, pattern=r'^01\d{9}$', examples=['01234567890'])] = "01234567890"
     role: Annotated[RoleEnum, Field(..., examples=['team_member'])] = RoleEnum.TEAM_MEMBER
-    team: Annotated[str | None, Field(..., examples=['logistics'])] = None
-
 
 class UserInDB(User):
-    _id: Annotated[str, Field(..., min_length=24, max_length=24, examples=['60c4b1b9d6b9a9c7f0a1b1b1'])] = "60c4b1b9d6b9a9c7f0a1b1b1"
+    id: Optional[str] = Field(alias='_id', default=None)
     disabled: bool = True
-    hashed_password: str = bcrypt.hashpw(b"dummy_password", bcrypt.gensalt()).decode("utf-8")
+    hashed_password: str
+    team: Optional[str] = None
+
+class UserResponse(User):
+    id: Optional[str]
+    team: Optional[str] = None
 
 
 class UserCreateRequest(BaseModel):

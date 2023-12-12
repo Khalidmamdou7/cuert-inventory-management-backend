@@ -77,6 +77,8 @@ This will create a new folder in the `src` directory with the name `<module_name
 
 You are welcome to create a new module manually, but make sure you follow the folder structure.
 
+Note that u will need to include the new router in the `src/routes.py` file.
+
 ## Adding a new dependency
 
 If you want to add a new dependency, make sure you add it to the `requirements.txt` file by running the following command

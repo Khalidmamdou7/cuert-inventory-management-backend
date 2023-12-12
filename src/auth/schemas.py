@@ -4,10 +4,12 @@
 # for db
 
 from fastapi import HTTPException, status
-from .models import UserInDB, UserCreateResponse, RoleEnum
+from .models import UserInDB, UserCreateResponse, RoleEnum, UserResponse
 from ..database import Database
 from pymongo.errors import DuplicateKeyError
 from bson.objectid import ObjectId
+from ..teams.schemas import TeamsDB
+from ..utils.utils import db_to_dict
 
 class UsersDB():
     def __init__(self):
@@ -37,7 +39,7 @@ class UsersDB():
 
         return UserCreateResponse(**user.model_dump())
     
-    def get_user(self, identifier: str):
+    def get_user(self, identifier: str) -> UserInDB:
         """
         Get a user from the database.
 
@@ -48,11 +50,12 @@ class UsersDB():
             UserInDB: the user that was retrieved
         
         """
-        
         user = self.collection.find_one({"$or": [{"email": identifier}, {"username": identifier}, {"mobile": identifier}]})
         if user is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-        return UserInDB(**user)
+        user = UserInDB(**db_to_dict(user))
+        user = self.get_user_team(user)
+        return user
     
     def get_user_by_id(self, user_id: str):
         """
@@ -73,8 +76,7 @@ class UsersDB():
         if user is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
         
-        print(user)
-        return UserInDB(**user)
+        return UserInDB(**db_to_dict(user))
     
     def update_user(self, user: UserInDB):
         """
@@ -106,4 +108,46 @@ class UsersDB():
         admin_user = self.collection.find_one({"role": RoleEnum.ADMIN})
         if admin_user is None:
             return None
-        return UserInDB(**admin_user)
+        return UserInDB(**db_to_dict(admin_user))
+    
+    def set_user_team(self, user: UserInDB, team_id: str):
+        """
+        Set the team of a user.
+
+        Args:
+            user_identifier (str): the identifier of the user to be updated
+            team_id (str): the id of the team to be set
+
+        Returns:
+            UserInDB: the user that was updated
+        
+        Raises:
+            HTTPException: if the user does not exist
+        """
+        team = TeamsDB().get_team(team_id)
+        if self.db.get_collection('users_teams').find_one({"user_id": user.id}):
+            self.db.get_collection('users_teams').update_one({"user_id": user.id}, {"$set": {"team_id": ObjectId(team_id)}})
+        else:
+            self.db.get_collection('users_teams').insert_one({"user_id": ObjectId(user.id), "team_id": ObjectId(team_id)})
+        user.team = team.name
+        return user
+    
+    def get_user_team(self, user: UserInDB) -> UserInDB:
+        """
+        Get the team of a user.
+
+        Args:
+            user (UserInDB): the user to be updated
+        
+        Returns:
+            UserInDB: the user that was updated
+
+        Raises:
+            HTTPException: if the user does not exist
+        """
+        team = self.db.get_collection('users_teams').find_one({"user_id": user.id})
+        if team is None:
+            user.team = None
+            return user
+        user.team = TeamsDB().get_team(str(team["team_id"])).name
+        return user

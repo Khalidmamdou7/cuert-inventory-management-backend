@@ -23,7 +23,7 @@ def get_password_hash(password):
 
 
 def create_access_token(data: TokenData, expires_delta: timedelta | None = None):
-    to_encode = data
+    to_encode = TokenData(**data).model_dump()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
