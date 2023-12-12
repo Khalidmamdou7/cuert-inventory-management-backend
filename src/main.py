@@ -5,8 +5,30 @@ from fastapi.exceptions import RequestValidationError
 from .routes import routes
 from .config import APP_SETTINGS
 from fastapi.middleware.cors import CORSMiddleware
+from .exceptions import custom_http_exception_handler, validation_exception_handler
+from .database import Database
+from contextlib import asynccontextmanager
+from .auth.service import create_admin_user
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Code to be executed on application startup
+    print("App startup, access the docs at: http://localhost:" + str(APP_SETTINGS.PORT) + "/docs")
+    try:
+        Database() # Initialize the database connection
+        create_admin_user() # Create the admin user if it doesn't exist
+
+    except Exception as e:
+        raise e
+        print("Error: Database connection failed")
+    
+    yield
+    # Code to be executed on application shutdown
+    print("App is shutting down")
+
+
+
+app = FastAPI(lifespan=lifespan)
 
 origins = [
     "http://localhost.tiangolo.com",
@@ -27,9 +49,9 @@ app.add_middleware(
 
 app.include_router(routes)
 
-# app.add_exception_handler(HTTPException, custom_http_exception_handler)
-# app.add_exception_handler(RequestValidationError, validation_exception_handler)
-
+app.add_exception_handler(HTTPException, custom_http_exception_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+    
 
 
 @app.get("/")
