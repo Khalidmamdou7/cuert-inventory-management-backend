@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 import re
 
 from ..auth.models import RoleEnum, User, UserResponse
+from ..suppliers.models import SupplierResponse
 
 
 
@@ -41,6 +42,7 @@ class ItemRequestInDB(ItemRequestCreateRequest):
     cost_per_item: Annotated[float, Field(..., examples=[100.0])] = 100.0
     # cost_per_item_estimated: Annotated[float, Field(..., examples=[100.0])] = 100.0
     # reason: Annotated[str, Field(..., examples=['Need it for project X'])] = "Need it for project X"
+    supplier_id: Optional[str] = None
 
 class ItemRequestResponse(ItemRequestCreateRequest):
     id: Optional[str]
@@ -57,6 +59,7 @@ class ItemRequestResponse(ItemRequestCreateRequest):
     cost_per_item: Annotated[float, Field(..., examples=[100.0])] = 100.0
     cost_per_item_estimated: Annotated[float, Field(..., examples=[100.0])] = 100.0
     reason: Annotated[str, Field(..., examples=['Need it for project X'])] = "Need it for project X"
+    supplier: Optional[SupplierResponse] = None
 
 
 class ItemRequestUpdateRequest(ItemRequestCreateRequest):
@@ -65,6 +68,7 @@ class ItemRequestUpdateRequest(ItemRequestCreateRequest):
     approved_by_id: Optional[str] = None
     delivered_by_id: Optional[str] = None
     delivery_date: Optional[str] = None
+    supplier_id: Optional[str] = None
 
 # class UserItemRequestsResponse(BaseModel):
 #     item_requests: list[ItemRequestResponse]
