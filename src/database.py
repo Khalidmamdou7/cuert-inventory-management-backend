@@ -54,4 +54,6 @@ class Database:
         # for "users_teams" collection, the unique index is a combination of "user_id" and "team_id"
         self.db.users_teams.create_index([('user_id', 1), ('team_id', 1)], unique=True)
 
+        self.db.suppliers.create_index('name', unique=True)
+
         print('Created indexes successfully')
