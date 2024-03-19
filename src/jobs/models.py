@@ -32,7 +32,9 @@ class JobCreateRequest(BaseModel):
     description: Annotated[str, Field(..., examples=['description about the job'])] = "No description"
     requirements: Annotated[str, Field(..., examples=['requirements for the job'])] = "No requirements"
     date_created: str = datetime.now().isoformat()
-    deadline: datetime
+    date_posted: Annotated[datetime, Field(..., examples=['2024-03-19T18:37:24.543197'])]
+    deadline: Annotated[datetime, Field(..., examples=['2024-03-19T18:37:24.543197'])]
+    isActive: Annotated[bool, Field(..., examples=[False])]
     team: Team
     questions: list[Question]
 
@@ -51,7 +53,9 @@ class Job(BaseModel):
     description: Annotated[str, Field(..., examples=['description about the job'])] = "No description"
     requirements: Annotated[str, Field(..., examples=['requirements for the job'])] = "No requirements"
     date_created: str = datetime.now().isoformat()
-    deadline: datetime
+    date_posted: Annotated[datetime, Field(..., examples=['2024-03-19T18:37:24.543197'])]
+    deadline: Annotated[datetime, Field(..., examples=['2024-03-19T18:37:24.543197'])]
+    isActive: Annotated[bool, Field(..., examples=[False])]
     team: Team
     questions: list[Question]
 
